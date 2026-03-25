@@ -8,8 +8,10 @@ import solc from "solc";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const SHARDEUM_RPC_URL = "https://sphinx.shardeum.org/";
-const SHARDEUM_CHAIN_ID = 8082;
+const NETWORKS = {
+  mainnet: { rpc: "https://api.shardeum.org", chainId: 8118, name: "Shardeum Mainnet" },
+  testnet: { rpc: "https://sphinx.shardeum.org", chainId: 8082, name: "Shardeum Sphinx Testnet" },
+};
 
 function compileSolidityContract(sourcePath) {
   console.log(chalk.gray(`  Reading contract from: ${sourcePath}`));
@@ -87,10 +89,11 @@ export async function deployCommand(options = {}) {
   }
 
   try {
-    console.log(chalk.blue("  Connecting to Shardeum testnet..."));
-    const provider = new ethers.JsonRpcProvider(SHARDEUM_RPC_URL, {
-      chainId: SHARDEUM_CHAIN_ID,
-      name: "shardeum-sphinx",
+    const network = NETWORKS[options.network] ?? NETWORKS.mainnet;
+    console.log(chalk.blue(`  Connecting to ${network.name}...`));
+    const provider = new ethers.JsonRpcProvider(network.rpc, {
+      chainId: network.chainId,
+      name: "shardeum",
     });
 
     const formattedKey = privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`;
@@ -120,10 +123,20 @@ export async function deployCommand(options = {}) {
     const factory = new ethers.ContractFactory(abi, bytecode, wallet);
 
     const constructorMessage = "Hello from Shardeum!";
-    const contract = await factory.deploy(constructorMessage);
+
+    const gasPrice = 1n;
+    const gasLimit = 1000000;
+    console.log(chalk.gray(`  Gas price      : 1 wei (minimal)`));
+    console.log(chalk.gray(`  Gas limit      : ${gasLimit}`));
+
+    const contract = await factory.deploy(constructorMessage, {
+      gasPrice,
+      gasLimit,
+      type: 0,
+    });
 
     console.log(chalk.yellow(`  Transaction hash: ${contract.deploymentTransaction()?.hash}`));
-    console.log(chalk.gray("  Waiting for confirmation..."));
+    console.log(chalk.gray("  Waiting for confirmation... (this may take 30-60 seconds)"));
 
     await contract.waitForDeployment();
     const deployedAddress = await contract.getAddress();
@@ -133,9 +146,29 @@ export async function deployCommand(options = {}) {
     console.log(chalk.gray(`\n  Check status with:`));
     console.log(chalk.cyan(`  node index.js status ${deployedAddress}\n`));
   } catch (err) {
-    console.log(chalk.red(`\n  Deployment failed: ${err.message}`));
-    if (err.message.includes("insufficient funds")) {
-      console.log(chalk.yellow("  Get testnet SHM from: https://faucet.shardeum.org"));
+    const msg = err?.message ?? String(err);
+    const innerMsg = err?.error?.message ?? "";
+    const fullMsg = msg + " " + innerMsg;
+
+    console.log(chalk.red(`\n  Deployment failed!`));
+
+    if (fullMsg.includes("minimum global fee") || fullMsg.includes("insufficient fee")) {
+      console.log(chalk.yellow("\n  Reason: The Shardeum mainnet requires a minimum fee of ~2048 SHM to deploy."));
+      console.log(chalk.yellow("  Your balance (6.41 SHM) is not enough for mainnet deployment.\n"));
+      console.log(chalk.cyan("  Solution: Use the Shardeum TESTNET instead:"));
+      console.log(chalk.gray("  1. Run this CLI locally on your own machine (not Replit servers)"));
+      console.log(chalk.gray("  2. The testnet RPC (https://sphinx.shardeum.org) works from local machines"));
+      console.log(chalk.gray("  3. Get free testnet SHM at: https://faucet.shardeum.org"));
+      console.log(chalk.gray("  4. Then run: node index.js deploy --network testnet\n"));
+    } else if (fullMsg.includes("insufficient funds")) {
+      console.log(chalk.yellow("  Reason: Insufficient balance to cover gas costs."));
+      console.log(chalk.yellow("  Get testnet SHM from: https://faucet.shardeum.org\n"));
+    } else if (fullMsg.includes("nonce")) {
+      console.log(chalk.yellow("  Reason: Nonce issue — try again in a few seconds.\n"));
+    } else if (fullMsg.includes("network") || fullMsg.includes("ENOTFOUND")) {
+      console.log(chalk.yellow("  Reason: Cannot reach Shardeum network. Check your internet connection.\n"));
+    } else {
+      console.log(chalk.gray(`  Details: ${fullMsg.slice(0, 300)}`));
     }
     process.exit(1);
   }

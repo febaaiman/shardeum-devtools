@@ -22,8 +22,9 @@ program
 
 program
   .command("deploy")
-  .description("Deploy the sample smart contract (contracts/SampleContract.sol) to Shardeum testnet")
+  .description("Deploy the sample smart contract (contracts/SampleContract.sol) to Shardeum")
   .option("-i, --interactive", "Use interactive mode with prompts")
+  .option("-n, --network <network>", "Network to deploy to: mainnet or testnet (default: mainnet)", "mainnet")
   .action(async (options) => {
     await deployCommand(options);
   });
@@ -56,10 +57,10 @@ program
     console.log(chalk.blue.bold("  Environment Variables Required:"));
     console.log(chalk.gray("    PRIVATE_KEY  - Your wallet private key (set in Replit Secrets)\n"));
 
-    console.log(chalk.blue.bold("  Shardeum Testnet Info:"));
-    console.log(chalk.gray("    Network: Shardeum Sphinx"));
-    console.log(chalk.gray("    RPC URL: https://sphinx.shardeum.org/"));
-    console.log(chalk.gray("    Chain ID: 8082"));
+    console.log(chalk.blue.bold("  Shardeum Network Info:"));
+    console.log(chalk.gray("    Network: Shardeum (Mainnet)"));
+    console.log(chalk.gray("    RPC URL: https://api.shardeum.org"));
+    console.log(chalk.gray("    Chain ID: 8118"));
     console.log(chalk.gray("    Faucet:  https://faucet.shardeum.org\n"));
   });
 

@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import { ethers } from "ethers";
 
-const SHARDEUM_RPC_URL = "https://sphinx.shardeum.org/";
-const SHARDEUM_CHAIN_ID = 8082;
+const SHARDEUM_RPC_URL = "https://api.shardeum.org";
+const SHARDEUM_CHAIN_ID = 8118;
 
 export async function statusCommand(contractAddress) {
   console.log(chalk.cyan.bold("\n  [ Status Command ]\n"));
