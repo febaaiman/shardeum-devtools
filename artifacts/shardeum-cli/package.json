@@ -1,0 +1,38 @@
+{
+  "name": "shardeum-cli",
+  "version": "1.0.0",
+  "description": "A Node.js CLI developer tool for Shardeum blockchain - deploy and monitor smart contracts on testnet",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "shardeum": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "deploy": "node index.js deploy",
+    "status": "node index.js status",
+    "help": "node index.js help"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.4",
+    "inquirer": "^9.3.7",
+    "solc": "^0.8.28"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "shardeum",
+    "blockchain",
+    "cli",
+    "smart-contract",
+    "developer-tool",
+    "ethers",
+    "web3"
+  ],
+  "author": "Shardeum Dev Kit",
+  "license": "MIT"
+}

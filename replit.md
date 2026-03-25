@@ -4,6 +4,17 @@
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
+## Shardeum Developer CLI
+
+A Node.js CLI tool for deploying and monitoring smart contracts on Shardeum testnet.
+
+- **Location**: `artifacts/shardeum-cli/`
+- **Entry point**: `artifacts/shardeum-cli/index.js`
+- **Commands**: `deploy`, `status <address>`, `help-info`
+- **Dependencies**: ethers.js, commander.js, inquirer.js, chalk, solc, dotenv
+- **Network**: Shardeum Sphinx Testnet (Chain ID: 8082, RPC: https://sphinx.shardeum.org/)
+- **Required secret**: `PRIVATE_KEY` (set in Replit Secrets)
+
 ## Stack
 
 - **Monorepo tool**: pnpm workspaces
