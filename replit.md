@@ -4,6 +4,32 @@
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
+## Shardeum DevTools (Main App)
+
+A full-stack developer tooling dashboard for Shardeum blockchain. Built with React + Vite frontend and Express API backend.
+
+- **Location**: `artifacts/shardeum-devtools/`
+- **Preview Path**: `/`
+- **Network**: Shardeum Dapps Testnet (Chain ID: 8118, RPC: https://api.shardeum.org)
+- **Features**:
+  - Network Monitor: live block number, gas price, peers, chain ID
+  - Contract Deployer: compile Solidity + deploy to Shardeum
+  - Contract Debugger: call/send contract functions via ABI
+  - Transaction Explorer: look up any tx hash or address
+  - Wallet Checker: balance, tx count, contract detection
+
+## Shardeum API Routes
+
+All Shardeum routes are in `artifacts/api-server/src/routes/shardeum.ts`:
+- `GET /api/shardeum/network` — live network stats
+- `GET /api/shardeum/recent-blocks` — last 5 blocks
+- `POST /api/shardeum/compile` — compile Solidity source
+- `POST /api/shardeum/deploy` — deploy compiled contract
+- `GET /api/shardeum/transaction/:hash` — tx details
+- `GET /api/shardeum/address/:address` — address info + balance
+- `POST /api/shardeum/contract/call` — read-only contract call
+- `POST /api/shardeum/contract/send` — state-changing contract tx
+
 ## Shardeum Developer CLI
 
 A Node.js CLI tool for deploying and monitoring smart contracts on Shardeum testnet.
@@ -12,8 +38,6 @@ A Node.js CLI tool for deploying and monitoring smart contracts on Shardeum test
 - **Entry point**: `artifacts/shardeum-cli/index.js`
 - **Commands**: `deploy`, `status <address>`, `help-info`
 - **Dependencies**: ethers.js, commander.js, inquirer.js, chalk, solc, dotenv
-- **Network**: Shardeum Sphinx Testnet (Chain ID: 8082, RPC: https://sphinx.shardeum.org/)
-- **Required secret**: `PRIVATE_KEY` (set in Replit Secrets)
 
 ## Stack
 

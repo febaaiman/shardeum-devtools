@@ -1,0 +1,13 @@
+packages:
+  "framer-motion": "For smooth transitions, accordion animations, and terminal cursor effects"
+  "date-fns": "For formatting blockchain timestamps"
+  "lucide-react": "For beautiful consistent iconography"
+  "clsx": "For conditional class merging"
+  "tailwind-merge": "For merging tailwind utility classes safely"
+  "@hookform/resolvers": "For Zod schema form validation"
+  "react-hook-form": "For robust form state management"
+  "zod": "For schema validation"
+
+notes:
+  - Using manual fetch wrapped in React Query to hit backend API routes
+  - Assuming the API runs on the same host, using import.meta.env.BASE_URL for correct pathing

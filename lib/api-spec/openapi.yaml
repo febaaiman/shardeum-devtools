@@ -1,22 +1,22 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Shardeum Developer Tools API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: shardeum
+    description: Shardeum network operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +24,201 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /shardeum/network:
+    get:
+      operationId: getNetworkStatus
+      tags: [shardeum]
+      summary: Get Shardeum network status
+      responses:
+        "200":
+          description: Network status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NetworkStatus"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shardeum/compile:
+    post:
+      operationId: compileContract
+      tags: [shardeum]
+      summary: Compile a Solidity contract
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompileRequest"
+      responses:
+        "200":
+          description: Compilation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompileResult"
+        "400":
+          description: Compilation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shardeum/deploy:
+    post:
+      operationId: deployContract
+      tags: [shardeum]
+      summary: Deploy a compiled contract to Shardeum
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeployRequest"
+      responses:
+        "200":
+          description: Deployment result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeployResult"
+        "400":
+          description: Deploy error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shardeum/transaction/{hash}:
+    get:
+      operationId: getTransaction
+      tags: [shardeum]
+      summary: Get transaction details by hash
+      parameters:
+        - name: hash
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transaction details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionDetails"
+        "404":
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shardeum/address/{address}:
+    get:
+      operationId: getAddressInfo
+      tags: [shardeum]
+      summary: Get address information (balance, tx count, code)
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Address info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddressInfo"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shardeum/contract/call:
+    post:
+      operationId: callContract
+      tags: [shardeum]
+      summary: Call a read-only contract function
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContractCallRequest"
+      responses:
+        "200":
+          description: Call result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContractCallResult"
+        "400":
+          description: Call error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shardeum/contract/send:
+    post:
+      operationId: sendContractTransaction
+      tags: [shardeum]
+      summary: Send a state-changing transaction to a contract function
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContractSendRequest"
+      responses:
+        "200":
+          description: Transaction hash
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContractSendResult"
+        "400":
+          description: Transaction error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shardeum/recent-blocks:
+    get:
+      operationId: getRecentBlocks
+      tags: [shardeum]
+      summary: Get recent block data for monitoring
+      responses:
+        "200":
+          description: Recent blocks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecentBlocksResult"
+        "500":
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +229,273 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: string
+      required:
+        - error
+
+    NetworkStatus:
+      type: object
+      properties:
+        blockNumber:
+          type: number
+        gasPrice:
+          type: string
+        chainId:
+          type: number
+        networkName:
+          type: string
+        rpcUrl:
+          type: string
+        isConnected:
+          type: boolean
+        peerCount:
+          type: number
+      required:
+        - blockNumber
+        - gasPrice
+        - chainId
+        - networkName
+        - rpcUrl
+        - isConnected
+        - peerCount
+
+    CompileRequest:
+      type: object
+      properties:
+        source:
+          type: string
+          description: Solidity source code
+        contractName:
+          type: string
+          description: Contract name to extract from the compiled output
+      required:
+        - source
+        - contractName
+
+    CompileResult:
+      type: object
+      properties:
+        abi:
+          type: array
+          items: {}
+        bytecode:
+          type: string
+        contractName:
+          type: string
+        warnings:
+          type: array
+          items:
+            type: string
+      required:
+        - abi
+        - bytecode
+        - contractName
+        - warnings
+
+    DeployRequest:
+      type: object
+      properties:
+        abi:
+          type: array
+          items: {}
+        bytecode:
+          type: string
+        privateKey:
+          type: string
+        constructorArgs:
+          type: array
+          items: {}
+      required:
+        - abi
+        - bytecode
+        - privateKey
+
+    DeployResult:
+      type: object
+      properties:
+        contractAddress:
+          type: string
+        transactionHash:
+          type: string
+        blockNumber:
+          type: number
+        gasUsed:
+          type: string
+      required:
+        - contractAddress
+        - transactionHash
+        - blockNumber
+        - gasUsed
+
+    TransactionDetails:
+      type: object
+      properties:
+        hash:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        value:
+          type: string
+        gasPrice:
+          type: string
+        gasLimit:
+          type: string
+        gasUsed:
+          type: string
+        blockNumber:
+          type: number
+        blockHash:
+          type: string
+        status:
+          type: string
+        timestamp:
+          type: number
+        input:
+          type: string
+        nonce:
+          type: number
+      required:
+        - hash
+        - from
+        - value
+        - gasPrice
+        - gasLimit
+        - blockNumber
+        - status
+        - input
+        - nonce
+
+    AddressInfo:
+      type: object
+      properties:
+        address:
+          type: string
+        balanceWei:
+          type: string
+        balanceSHM:
+          type: string
+        transactionCount:
+          type: number
+        isContract:
+          type: boolean
+        code:
+          type: string
+      required:
+        - address
+        - balanceWei
+        - balanceSHM
+        - transactionCount
+        - isContract
+
+    ContractCallRequest:
+      type: object
+      properties:
+        contractAddress:
+          type: string
+        abi:
+          type: array
+          items: {}
+        functionName:
+          type: string
+        args:
+          type: array
+          items: {}
+      required:
+        - contractAddress
+        - abi
+        - functionName
+
+    ContractCallResult:
+      type: object
+      properties:
+        result:
+          description: The result of the call (can be any type)
+        functionName:
+          type: string
+      required:
+        - result
+        - functionName
+
+    ContractSendRequest:
+      type: object
+      properties:
+        contractAddress:
+          type: string
+        abi:
+          type: array
+          items: {}
+        functionName:
+          type: string
+        args:
+          type: array
+          items: {}
+        privateKey:
+          type: string
+        value:
+          type: string
+      required:
+        - contractAddress
+        - abi
+        - functionName
+        - privateKey
+
+    ContractSendResult:
+      type: object
+      properties:
+        transactionHash:
+          type: string
+        blockNumber:
+          type: number
+        gasUsed:
+          type: string
+        status:
+          type: string
+      required:
+        - transactionHash
+        - status
+
+    BlockInfo:
+      type: object
+      properties:
+        number:
+          type: number
+        hash:
+          type: string
+        timestamp:
+          type: number
+        transactionCount:
+          type: number
+        gasUsed:
+          type: string
+        gasLimit:
+          type: string
+        miner:
+          type: string
+      required:
+        - number
+        - hash
+        - timestamp
+        - transactionCount
+        - gasUsed
+        - gasLimit
+
+    RecentBlocksResult:
+      type: object
+      properties:
+        blocks:
+          type: array
+          items:
+            $ref: "#/components/schemas/BlockInfo"
+        latestBlock:
+          type: number
+      required:
+        - blocks
+        - latestBlock

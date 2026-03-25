@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Shardeum DevTools"
+version = "1.0.0"
+id = "artifacts/shardeum-devtools"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19761
+
+[services.development]
+run = "pnpm --filter @workspace/shardeum-devtools run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/shardeum-devtools", "run", "build" ]
+publicDir = "artifacts/shardeum-devtools/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19761"
+BASE_PATH = "/"
